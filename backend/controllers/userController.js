@@ -1,14 +1,20 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
-const { signupSchema, loginSchema } = require("../utils/schemaValidation");
+const {
+  signupSchema,
+  loginSchema,
+  updateSchema,
+} = require("../utils/schemaValidation");
 
 module.exports = {
   userSignUp: async (req, res) => {
     try {
       const validateRequest = signupSchema.safeParse(req.body);
       if (!validateRequest.success) {
-        return res.status(400).json({ message: validateRequest.error });
+        return res.status(400).json({
+          message: validateRequest.error.errors.map((error) => error.message),
+        });
       }
       const { firstName, lastName, password, userName } = req.body;
       const isUserExist = await User.findOne({ userName });
@@ -16,14 +22,16 @@ module.exports = {
         const salt = await bcrypt.genSalt(10);
         const hashPassword = await bcrypt.hash(password, salt);
 
-        const user = {
+        const user = User({
           firstName,
           lastName,
           password: hashPassword,
           userName,
-        };
+        });
         await user.save();
-        res.status(201).json({ message: "User signed up successfully" });
+        res
+          .status(201)
+          .json({ message: "User signed up successfully", user: user });
       } else {
         res
           .status(409)
@@ -37,11 +45,14 @@ module.exports = {
     }
   },
 
+  // user login fuction and generation tokek for validation
   userLogin: async (req, res) => {
     try {
       const validateRequest = loginSchema.safeParse(req.body);
       if (!validateRequest.success) {
-        return res.status(400).json({ message: validateRequest.error });
+        return res.status(400).json({
+          message: validateRequest.error.errors.map((error) => error.message),
+        });
       }
       const { userName, password } = req.body;
       const isUser = await User.findOne({ userName });
@@ -50,15 +61,19 @@ module.exports = {
           password,
           isUser.password
         );
+
         if (validatePassword) {
           const token = jwt.sign(
             { userId: isUser._id },
             process.env.JWT_SECRET,
             { expiresIn: "1d" }
           );
+
           res.status(200).json({ message: "Login success", token: token });
         } else {
-          res.status(403).json({ message: "Wrong Credentials" });
+          res.status(403).json({
+            message: " Incorrect username or password. Please try again",
+          });
         }
       } else {
         res.status(400).json({ message: "User not registered " });
@@ -73,11 +88,13 @@ module.exports = {
 
   updateUser: async (req, res) => {
     try {
-      const validateRequest = loginSchema.safeParse(req.body);
+      const validateRequest = updateSchema.safeParse(req.body);
       if (!validateRequest.success) {
-        return res.status(400).json({ message: validateRequest.error });
+        return res.status(400).json({
+          message: validateRequest.error.errors.map((error) => error.message),
+        });
       }
-      const id = req.user._id;
+      const id = req.user;
       if (id) {
         const updatedData = await User.findByIdAndUpdate(id, req.body, {
           new: true,
