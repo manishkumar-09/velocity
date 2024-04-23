@@ -6,6 +6,7 @@ const {
   loginSchema,
   updateSchema,
 } = require("../utils/schemaValidation");
+const Account = require("../models/accountModel");
 
 module.exports = {
   userSignUp: async (req, res) => {
@@ -29,6 +30,11 @@ module.exports = {
           userName,
         });
         await user.save();
+        const userId = user._id;
+        await Account.create({
+          userId,
+          balance: 1 + Math.random() * 10000,
+        });
         res
           .status(201)
           .json({ message: "User signed up successfully", user: user });
@@ -110,5 +116,34 @@ module.exports = {
         message: `Internal server error ${err.message}`,
       });
     }
+  },
+
+  //get user using name substring
+
+  findUsers: async (req, res) => {
+    const filter = req.query.filter || "";
+
+    const users = await User.find({
+      $or: [
+        {
+          firstName: {
+            $regex: filter,
+          },
+        },
+        {
+          lastName: {
+            $regex: filter,
+          },
+        },
+      ],
+    });
+    res.status(200).json({
+      user: users.map((user) => ({
+        userName: user.userName,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        _id: user._id,
+      })),
+    });
   },
 };
