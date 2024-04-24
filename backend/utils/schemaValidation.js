@@ -16,4 +16,4 @@ const updateSchema = zod.object({
   lastName: zod.string().optional(),
 });
 
-module.exports = { signupSchema, loginSchema };
+module.exports = { signupSchema, loginSchema, updateSchema };
