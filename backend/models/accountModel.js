@@ -1,7 +1,7 @@
 const { Schema, model } = require("mongoose");
 const accountSchema = new Schema(
   {
-    user_id: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
