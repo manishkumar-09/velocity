@@ -7,8 +7,13 @@ export const Users = () => {
   const [users, setUsers] = useState([]);
   const [filter, setFilter] = useState("");
   useEffect(() => {
+    const token = localStorage.getItem("token");
     axios
-      .get("http://localhost:3000/api/v1/bulk?filter=" + filter)
+      .get(`http://localhost:5000/api/v1/bulk?filter=${filter}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       .then((response) => {
         setUsers(response.data.user);
       })
@@ -17,7 +22,7 @@ export const Users = () => {
   return (
     <>
       <div>Users</div>
-      <div>
+      <div className="border rounded-xl">
         <input
           onChange={(e) => {
             setFilter(e.target.value);
@@ -41,10 +46,7 @@ function User({ user }) {
     <div className="flex justify-between">
       <div className="flex">
         <div>
-          <div>
-            {user.firstName[0]}
-            {console.log(user, "users****")}
-          </div>
+          <div>{user.firstName[0]} </div>
         </div>
         <div>
           {user.firstName} {user.lastName}
@@ -52,10 +54,10 @@ function User({ user }) {
       </div>
       <div>
         <Button
-          label={"Send Money"}
           onClick={(e) => {
-            navigate(`/send?id=${user._id} & name = ${user.firstName}`);
+            navigate("/send?id=" + user._id + "&name=" + user.firstName);
           }}
+          label={"Send Money"}
         />
       </div>
     </div>
