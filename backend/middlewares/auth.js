@@ -4,8 +4,8 @@ require("dotenv").config();
 const auth = async (req, res, next) => {
   try {
     const authHeader = req.headers?.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(403).json({ message: "Unauthorized user" });
+    if (!authHeader || !authHeader.startsWith("Bearer")) {
+      return res.status(401).json({ message: "Unauthorized user" });
     }
 
     const token = authHeader.split(" ")[1];

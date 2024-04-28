@@ -8,7 +8,7 @@ const signupSchema = zod.object({
 });
 const loginSchema = zod.object({
   password: zod.string(),
-  userName: zod.string().min(3),
+  userName: zod.string().email(),
 });
 
 const updateSchema = zod.object({

@@ -121,29 +121,36 @@ module.exports = {
   //get user using name substring
 
   findUsers: async (req, res) => {
-    const filter = req.query.filter || "";
+    try {
+      const filter = req.query.filter || "";
 
-    const users = await User.find({
-      $or: [
-        {
-          firstName: {
-            $regex: filter,
+      const users = await User.find({
+        $or: [
+          {
+            firstName: {
+              $regex: filter,
+            },
           },
-        },
-        {
-          lastName: {
-            $regex: filter,
+          {
+            lastName: {
+              $regex: filter,
+            },
           },
-        },
-      ],
-    });
-    res.status(200).json({
-      user: users.map((user) => ({
-        userName: user.userName,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        _id: user._id,
-      })),
-    });
+        ],
+      });
+      res.status(200).json({
+        user: users.map((user) => ({
+          _id: user._id,
+          userName: user.userName,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        })),
+      });
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        message: `Internal server error ${err}`,
+      });
+    }
   },
 };
