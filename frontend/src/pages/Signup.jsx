@@ -51,6 +51,7 @@ export const SignUp = () => {
                   })
                   .then((res) => {
                     console.log(res.data);
+                    res.data;
                   })
                   .catch((err) => {
                     console.log(err.message);
